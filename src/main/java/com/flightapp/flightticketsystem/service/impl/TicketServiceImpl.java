@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bilet oluşturma ve kullanıcının geçmiş biletlerini sorgulama iş mantığını yürüten servis sınıfıdır[cite: 1].
@@ -48,6 +49,7 @@ public class TicketServiceImpl implements ITicketService {
      * @throws BaseException Uçuş veya koltuk bulunamazsa, koltuk o uçuşa ait değilse ya da koltuk doluysa fırlatılır.
      */
     @Override
+    @Transactional
     public TicketResponseDto createTicket(TicketRequestDto requestDto) {
 
         // 1. Adım: Verilen flightId ile uçuşun sistemde mevcut olup olmadığını doğrula.
@@ -57,7 +59,7 @@ public class TicketServiceImpl implements ITicketService {
 
         // 2. Adım: Verilen seatId ile koltuğun sistemde kayıtlı olup olmadığını doğrula.
         Seat seat = seatRepository
-                .findById(requestDto.getSeatId())
+                .findByIdForUpdate(requestDto.getSeatId())
                 .orElseThrow(() -> new BaseException("error.seat_not_found"));
 
         // 3. Adım: Güvenlik Kontrolü - Seçilen koltuk gerçekten seçilen uçuşa mı ait?

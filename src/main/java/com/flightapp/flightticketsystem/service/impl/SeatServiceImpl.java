@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Uçuşlara ait koltukların yönetimini (ekleme, listeleme, güncelleme, silme ve doluluk sorgulama)
@@ -107,10 +108,15 @@ public class SeatServiceImpl implements ISeatService {
      * @throws BaseException Koltuk veya atanmak istenen yeni uçuş bulunamazsa fırlatılır.
      */
     @Override
+    @Transactional
     public SeatResponseDto updateSeat(Integer id, SeatRequestDto requestDto) {
         // 1. Adım: Güncellenmek istenen koltuğu ID ile bul, bulunamazsa hata fırlat.
-        Seat seat = seatRepository.findById(id)
+        Seat seat = seatRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new BaseException("error.seat_not_found"));
+
+        if (seat.getTicket() != null) {
+            throw new BaseException("error.seat_has_ticket");
+        }
 
         // 2. Adım: Koltuğun bağlı olduğu uçuş değiştirilmek istenmiş mi kontrol et.
         if (!seat.getFlight().getId().equals(requestDto.getFlightId())) {
@@ -137,9 +143,10 @@ public class SeatServiceImpl implements ISeatService {
      * @throws BaseException Silinecek koltuk sistemde kayıtlı değilse fırlatılır.
      */
     @Override
+    @Transactional
     public void deleteSeat(Integer id) {
         // 1. Adım: Silinecek koltuğun veritabanında olup olmadığını kontrol et.
-        Seat seat = seatRepository.findById(id)
+        Seat seat = seatRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new BaseException("error.seat_not_found"));
 
         // 2. Adım: Koltuk kaydını veritabanından sil.

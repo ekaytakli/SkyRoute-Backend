@@ -34,7 +34,7 @@ public class User implements UserDetails {
     @Email(message = "Lütfen geçerli bir e-posta adresi giriniz")
     @NotNull(message = "E-posta alanı zorunludur")
     @NotBlank(message = "E-posta alanı boş bırakılamaz")
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @NotNull(message = "Şifre alanı zorunludur")

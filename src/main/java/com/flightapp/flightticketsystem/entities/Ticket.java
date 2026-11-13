@@ -21,7 +21,7 @@ public class Ticket {
     @Column(name = "ticket_id")
     private Integer id;
 
-    @Column(name = "pnr_kodu")
+    @Column(name = "pnr_kodu", nullable = false, unique = true)
     private String pnrKodu;
 
     @Column(name = "ticket_date")
@@ -36,6 +36,6 @@ public class Ticket {
     private Flight flight;
 
     @OneToOne()
-    @JoinColumn(name = "seat_id")
+    @JoinColumn(name = "seat_id", nullable = false, unique = true)
     private Seat seat;
 }

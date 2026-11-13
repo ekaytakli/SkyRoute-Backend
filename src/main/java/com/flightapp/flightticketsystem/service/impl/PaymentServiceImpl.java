@@ -89,7 +89,7 @@ public class PaymentServiceImpl implements IPaymentService {
                 .orElseThrow(() -> new BaseException("error.flight_not_found"));
 
         // Satın alınmak istenen koltuk veritabanında mevcut mu kontrol edilir.
-        Seat seat = seatRepository.findById(requestDto.getSeatId())
+        Seat seat = seatRepository.findByIdForUpdate(requestDto.getSeatId())
                 .orElseThrow(() -> new BaseException("error.seat_not_found"));
 
         // Güvenlik Kontrolü: Koltuk gerçekten seçilen uçuşa mı ait? (URL veya Request manipülasyonunu önler).

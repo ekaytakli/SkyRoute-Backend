@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "seats")
+@Table(name = "seats", uniqueConstraints = @UniqueConstraint(name = "uk_seat_flight_number", columnNames = {"flight_id", "seat_number"}))
 public class Seat {
 
     @Id
