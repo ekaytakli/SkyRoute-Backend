@@ -12,6 +12,17 @@ import lombok.Getter;
 @Getter // Lombok: messageKey ve args alanları için getter metotlarını otomatik üretir[cite: 1].
 public class BaseException extends RuntimeException {
 
+    public org.springframework.http.HttpStatus getStatus() {
+        return switch (messageKey) {
+            case "error.flight_not_found", "error.seat_not_found", "error.user_not_found" ->
+                    org.springframework.http.HttpStatus.NOT_FOUND;
+            case "error.user_already_exists", "error.seat_not_available", "error.seat_has_ticket" ->
+                    org.springframework.http.HttpStatus.CONFLICT;
+            case "error.unauthorized" -> org.springframework.http.HttpStatus.UNAUTHORIZED;
+            default -> org.springframework.http.HttpStatus.BAD_REQUEST;
+        };
+    }
+
     // messages.properties dosyalarındaki çeviri anahtarını tutar (Örn: "error.flight_not_found")[cite: 1]
     private final String messageKey;
 

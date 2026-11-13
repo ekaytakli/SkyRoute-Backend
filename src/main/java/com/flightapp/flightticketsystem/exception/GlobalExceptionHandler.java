@@ -9,6 +9,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Uygulamanın tüm Controller sınıflarında fırlatılan hataları tek bir merkezden yakalayan,
@@ -34,10 +39,29 @@ public class GlobalExceptionHandler {
         String message = getMessage(ex.getMessageKey(), ex.getArgs());
 
         // 2. Adım: Standart ErrorResponse modelini 400 kodu ve çevrilmiş mesajla oluştur.
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+        ErrorResponse response = new ErrorResponse(ex.getStatus().value(), message);
 
         // 3. Adım: İstemciye 400 HTTP durum koduyla JSON olarak dön.
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, ex.getStatus());
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class, PessimisticLockingFailureException.class})
+    public ResponseEntity<ErrorResponse> handleConflict(Exception ex) {
+        return error(HttpStatus.CONFLICT, "error.data_conflict");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, "error.forbidden");
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(Exception ex) {
+        return error(HttpStatus.BAD_REQUEST, "error.invalid_request");
+    }
+
+    private ResponseEntity<ErrorResponse> error(HttpStatus status, String key) {
+        return ResponseEntity.status(status).body(new ErrorResponse(status.value(), getMessage(key, null)));
     }
 
     /**
