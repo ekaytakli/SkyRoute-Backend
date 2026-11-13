@@ -77,11 +77,11 @@ public class SecurityConfig {
                                 "/api/v1/seats/**"
                         ).permitAll()
 
-                        // 4. Kural: Misafir kullanıcıların giriş yapmadan bilet alabilmesi (public flow) için bilet oluşturma POST isteği açıktır.
+                        // Doğrudan ödemesiz bilet oluşturma yalnızca yöneticiye açıktır.
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/tickets"
-                        ).permitAll()
+                        ).hasRole("ADMIN")
 
                         // 5. Kural: Ziyaretçiler ödeme adımını tamamlayabilsin diye ödeme başlatma POST isteği herkese açıktır.
                         .requestMatchers(

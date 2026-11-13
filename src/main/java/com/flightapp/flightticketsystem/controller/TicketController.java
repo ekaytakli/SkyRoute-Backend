@@ -26,8 +26,8 @@ public class TicketController {
      * Seçilen uçuş ve koltuk ID'si doğrultusunda yeni bir bilet oluşturan HTTP POST uç noktasıdır[cite: 1].
      * Rota: POST /api/v1/tickets[cite: 1]
      *
-     * Bu uç nokta SecurityConfig konfigürasyonunda 'permitAll' olarak tanımlandığı için
-     * hem kayıtlı kullanıcılar hem de giriş yapmamış misafir kullanıcılar tarafından çağrılabilir[cite: 1].
+     * Doğrudan (ödemesiz) bilet oluşturma yalnızca yöneticilere açıktır.
+     * Müşteriler ve misafirler bilet almak için ödeme uç noktasını kullanır.
      *
      * @param requestDto Biletin ait olacağı flightId ve seatId bilgilerini taşıyan DTO[cite: 1].
      *                   @Valid: Alanların (@NotNull) doğruluğunu denetler[cite: 1].
@@ -35,6 +35,7 @@ public class TicketController {
      * @return Üretilen biletin PNR kodunu, kesim tarihini ve detaylarını içeren TicketResponseDto nesnesi[cite: 1].
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public TicketResponseDto createTicket(
             @Valid @RequestBody TicketRequestDto requestDto
     ) {
