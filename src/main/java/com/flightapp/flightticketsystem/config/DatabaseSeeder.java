@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Uygulama her ayağa kalktığında veritabanında bulunması ZORUNLU olan
@@ -29,6 +30,13 @@ public class DatabaseSeeder implements CommandLineRunner {
     /**
      * Spring Boot uygulaması tamamen ayağa kalktığı anda otomatik olarak tetiklenen metottur.
      */
+    @Value("${app.bootstrap-admin.enabled:false}")
+    private boolean adminEnabled;
+    @Value("${app.bootstrap-admin.email:}")
+    private String adminEmail;
+    @Value("${app.bootstrap-admin.password:}")
+    private String adminPassword;
+
     @Override
     public void run(String... args) throws Exception {
 
@@ -49,11 +57,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
 
         // 3. ADIM: Sisteme ilk girişi yapabilmek için varsayılan bir yönetici (Admin) hesabı var mı kontrol et.
-        if (userRepository.findByEmail("admin@flight.com").isEmpty()) {
+        if (!adminEnabled) {
+            return;
+        }
+        if (adminEmail.isBlank() || adminPassword.length() < 12) {
+            throw new IllegalStateException("Bootstrap admin requires an email and a password of at least 12 characters");
+        }
+        if (userRepository.findByEmail(adminEmail).isEmpty()) {
             User adminUser = new User();
-            adminUser.setEmail("admin@flight.com");
-            // Açık şifre ("admin123") yerine güvenli hashlenmiş şifre atanır.
-            adminUser.setPassword(passwordEncoder.encode("admin123"));
+            adminUser.setEmail(adminEmail);
+            // Yonetici sifresi ortamdan alinir ve hashlenir.
+            adminUser.setPassword(passwordEncoder.encode(adminPassword));
             adminUser.setFirstName("Sistem");
             adminUser.setLastName("Yöneticisi");
 
@@ -62,7 +76,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             // Hazırlanan ilk admin kullanıcısını veritabanına kaydet.
             userRepository.save(adminUser);
-            System.out.println("Varsayılan Admin kullanıcısı (admin@flight.com / admin123) başarıyla eklendi");
+            System.out.println("Yönetici hesabı oluşturuldu.");
         }
     }
 }

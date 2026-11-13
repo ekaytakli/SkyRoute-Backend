@@ -23,8 +23,8 @@ import java.util.function.Function;
 public class JwtService {
 
     // Token'ları imzalamak ve çözmek için kullanılan 256-bit gizli anahtar.
-    // application.properties içinde 'jwt.secret' yoksa iki nokta sonrasındaki varsayılan değeri kullanır.
-    @Value("${jwt.secret:Uy9uABa63lWt2sSvqJjqc9qfBV2qfKIFedRRddyoFl2}")
+    // Anahtar ortam ayarlarindan gelir; varsayilan gizli anahtar bulunmaz.
+    @Value("${jwt.secret}")
     private String SECRET_KEY;
 
     /**
@@ -33,6 +33,11 @@ public class JwtService {
      * @param userDetails Spring Security kullanıcı detay nesnesi
      * @return İmzalanmış ve kompakt hale getirilmiş JWT metni
      */
+    @jakarta.annotation.PostConstruct
+    void validateSigningKey() {
+        getKey(); // Eksik veya zayif anahtar ile uygulama baslamasin.
+    }
+
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claimsMap = new HashMap<>();
 
