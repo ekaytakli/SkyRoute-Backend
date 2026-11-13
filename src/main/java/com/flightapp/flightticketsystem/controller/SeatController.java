@@ -32,6 +32,7 @@ public class SeatController {
      * @return Sisteme kaydedilen yeni koltuğun detaylarını içeren SeatResponseDto nesnesi[cite: 1].
      */
     @PostMapping("/add/seats")
+    @PreAuthorize("hasRole('ADMIN')")
     public SeatResponseDto addSeat(@Valid @RequestBody SeatRequestDto requestDto) {
         // Koltuk ekleme işlemini doğrudan servis katmanına devreder[cite: 1].
         return seatService.addSeat(requestDto);
@@ -74,6 +75,7 @@ public class SeatController {
      * @return Güncelleme sonrası oluşan en güncel koltuk bilgisi[cite: 1].
      */
     @PutMapping("/update/seats/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public SeatResponseDto updateSeat(@PathVariable Integer id, @Valid @RequestBody SeatRequestDto requestDto) {
         // Değişiklikleri kaydetmesi için ID ve yeni verileri servis katmanına aktarır[cite: 1].
         return seatService.updateSeat(id, requestDto);

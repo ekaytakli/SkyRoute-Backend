@@ -2,6 +2,7 @@ package com.flightapp.flightticketsystem.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,9 +32,11 @@ public class SeatRequestDto {
 
     // Koltuğun bilet satış ücreti (boş olamaz)
     @NotNull(message = "{error.price_null}")
+    @Positive(message = "{error.price_positive}")
     private BigDecimal price;
 
     // Koltuğun ait olduğu uçuşun referans ID'si (boş olamaz)
     @NotNull(message = "{error.flight_id_null}")
+    @Positive(message = "{error.id_positive}")
     private Integer flightId;
 }

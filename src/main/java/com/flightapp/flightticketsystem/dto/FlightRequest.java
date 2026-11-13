@@ -1,7 +1,12 @@
 package com.flightapp.flightticketsystem.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.AssertTrue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import lombok.*;
 
 /**
@@ -26,10 +31,29 @@ public class FlightRequest {
     private String destinationPoint;
 
     // Kalkış zamanı metin formatında (örn: "2026-10-15 14:30") zorunlu alandır.
-    @NotNull(message = "{error.time_null}")
+    @NotBlank(message = "{error.time_null}")
     private String departureTime;
 
     // Varış zamanı metin formatında zorunlu alandır.
-    @NotNull(message = "{error.time_null}")
+    @NotBlank(message = "{error.time_null}")
     private String destinationTime;
+
+    @JsonIgnore
+    @AssertTrue(message = "{error.flight_schedule_invalid}")
+    public boolean isScheduleValid() {
+        // Eksik alanlari @NotBlank kontrol eder. Burada tarih bicimi ve sirasi denetlenir.
+        if (departureTime == null || departureTime.isBlank()
+                || destinationTime == null || destinationTime.isBlank()) {
+            return true;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
+                .withResolverStyle(ResolverStyle.STRICT);
+        try {
+            LocalDateTime departure = LocalDateTime.parse(departureTime, formatter);
+            LocalDateTime destination = LocalDateTime.parse(destinationTime, formatter);
+            return destination.isAfter(departure);
+        } catch (DateTimeParseException ex) {
+            return false;
+        }
+    }
 }
